@@ -57,7 +57,7 @@
 ### データベース
 
 - SQLite（開発初期）
-- PostgreSQL（本番環境）
+- Supabase（本番環境）
 - Prisma（ORM）
 
 ## 🔄 今後の拡張予定
