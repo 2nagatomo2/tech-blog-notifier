@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendPushMessage } from "@/app/lib/lineApi";
 import crypto from "crypto";
+import { fetchFeed } from "@/app/lib/fetchFeed";
 
 export async function POST(req: NextRequest) {
   const signature = req.headers.get("x-line-signature") as string;
@@ -35,7 +36,28 @@ export async function POST(req: NextRequest) {
     console.log("送信先ユーザーID:", userId);
 
     // ここで記事情報を取得して送信
-    await sendPushMessage(userId, "新しい記事が公開されました！");
+    if (event.message.text === "LINE") {
+      const feed = await fetchFeed(
+        "https://techblog.lycorp.co.jp/ja/feed/index.xml"
+      );
+      await sendPushMessage(userId, feed[0].link);
+    } else if (
+      event.message.text === "メルカリ" ||
+      event.message.text === "mercari"
+    ) {
+      const feed = await fetchFeed(
+        "https://engineering.mercari.com/blog/feed.xml"
+      );
+      await sendPushMessage(userId, feed[0].link);
+    } else if (
+      event.message.text === "クックパッド" ||
+      event.message.text === "cookpad"
+    ) {
+      const feed = await fetchFeed("https://techlife.cookpad.com/rss");
+      await sendPushMessage(userId, feed[0].link);
+    } else {
+      await sendPushMessage(userId, "");
+    }
 
     return NextResponse.json({ message: "OK" });
   } catch (error) {
